@@ -1,279 +1,351 @@
-# Onboarding UI + Score Viewer
+# Investment Onboarding UI + Score Viewer
 
-A complete React/TypeScript frontend for the modular onboarding system, built with Next.js (App Router), Tailwind CSS, and React Query. This application provides a clean interface for submitting onboarding data and viewing calculated scores and session history.
+A modern React/TypeScript frontend application for investment readiness assessment, built with Next.js 14, Tailwind CSS, and React Query. This application provides a comprehensive onboarding experience that collects user information and displays personalized investment readiness scores.
 
-## Repository
+## 🏗️ Project Architecture
 
-**GitHub Repository:** https://github.com/example/onboarding-ui-score-viewer
+### Frontend Stack
+- **Framework:** Next.js 14 (App Router) + TypeScript
+- **Styling:** Tailwind CSS + Radix UI components
+- **State Management:** React Hook Form + React Query (TanStack Query)
+- **Form Validation:** Zod schemas
+- **HTTP Client:** Axios
+- **Testing:** Vitest + React Testing Library
+- **Icons:** Lucide React
 
-To initialize and push this repository:
-
-```bash
-git init
-git remote add origin https://github.com/example/onboarding-ui-score-viewer
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git push -u origin main
-```
-
-## Architecture Overview
+### Architecture Flow
 
 ```mermaid
 sequenceDiagram
-  participant UI
-  participant API
-  participant Redis
-  participant PG
-  participant Scorer
+  participant User
+  participant UI as Frontend (Next.js)
+  participant API as Backend API
+  participant DB as Database
+  participant Scorer as Scoring Engine
 
-  UI->>API: POST /v1/onboarding (userId, rawInput)
-  API->>PG: INSERT session
-  API->>Scorer: POST /score(parsedData)
-  Scorer-->>API: score + explanation
-  API->>PG: UPDATE session with score
-  API->>Redis: LPUSH recent list (TTL 24h)
-  API-->>UI: Show score + explanation
-
-  UI->>API: GET /v1/onboarding/recent/:user_id
-  API->>Redis: LRANGE last 10
-  API-->>UI: recent sessions
+  User->>UI: Fill onboarding form
+  UI->>UI: Validate form data (Zod)
+  UI->>UI: Save state to localStorage
+  User->>UI: Submit assessment
+  UI->>API: POST /v1/onboarding (personalInfo, preferences)
+  API->>DB: Store user session
+  API->>Scorer: Calculate investment score
+  Scorer-->>API: Return score + recommendations
+  API->>DB: Update session with score
+  API-->>UI: Return session + score
+  UI->>UI: Display score breakdown & recommendations
+  UI->>UI: Show score history
 ```
 
-## Tech Stack
+## 🚀 Features
 
-- **Framework:** Next.js 14 (App Router) + TypeScript
-- **Styling:** Tailwind CSS
-- **Data Fetching:** React Query (TanStack Query) + Axios
-- **Forms:** React Hook Form + Zod validation
-- **Testing:** Vitest + React Testing Library
-- **Type Generation:** openapi-typescript (optional)
-- **Code Quality:** ESLint + Prettier
+### 📝 **3-Step Onboarding Process**
 
-## Prerequisites
+**Step 1: Basic Information**
+- Age (18-100)
+- Annual Income
+- Employment Status (Full-time, Part-time, Self-employed, Unemployed, Retired)
+- Education Level (High School, Bachelor's, Master's, PhD, Other)
 
-- Node.js 18+ (or 20+)
-- PNPM (recommended) or npm/yarn
-- Running backend API at `http://localhost:3000` (see [modular-onboarding-scoring](https://github.com/example/modular-onboarding-scoring))
+**Step 2: Investment Preferences** 
+- Risk Tolerance (Low, Moderate, High)
+- Investment Goals (Multiple selection: Retirement, Wealth Building, Income, Education, Emergency Fund, Other)
+- Time Horizon (Short-term 1-3 years, Medium-term 3-10 years, Long-term 10+ years)
 
-## Setup
+**Step 3: Review & Submit**
+- Review all entered information
+- Submit for assessment
+- Receive personalized investment readiness score
 
-1. **Install dependencies:**
+### 📊 **Score Display & Analytics**
+
+**Investment Readiness Score (0-100)**
+- Visual circular progress indicator
+- Color-coded score ranges (Low: Red, Medium: Yellow, High: Green)
+- Detailed score breakdown by category
+
+**Score Components**
+- Personal Information Analysis
+- Risk Assessment
+- Investment Goal Alignment
+- Time Horizon Suitability
+
+**Recommendations**
+- Personalized investment advice
+- Action items for improvement
+- Educational resources
+
+### 📈 **Session History & Tracking**
+
+**Recent Sessions**
+- View past assessment scores
+- Track progress over time
+- Session details (Date, Score, Session ID)
+- User-specific history
+
+**Data Persistence**
+- Client-side form state saving (localStorage)
+- Resume incomplete assessments
+- Reset functionality
+
+### 🎨 **UI/UX Features**
+
+**Responsive Design**
+- Mobile-first approach
+- Adaptive layouts for all screen sizes
+- Touch-friendly interactions
+
+**Accessibility**
+- ARIA labels and roles
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management
+
+**User Experience**
+- Step-by-step progress indicator
+- Form validation with helpful error messages
+- Loading states and feedback
+- Smooth transitions and animations
+
+## 🛠️ Setup & Development
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Running backend API
+
+### Installation
+
+1. **Clone the repository:**
    ```bash
-   pnpm install
-   # or: npm install
-   # or: yarn install
+   git clone https://github.com/mengeshaster/onboarding-ui-score-viewer.git
+   cd onboarding-ui-score-viewer
    ```
 
-2. **Copy environment configuration:**
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Environment Configuration:**
    ```bash
    cp .env.local.example .env.local
    ```
 
-3. **Configure environment variables in `.env.local`:**
+   Configure environment variables in `.env.local`:
    ```env
    NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
-   NEXT_PUBLIC_HARDCODED_USER_ID=7a3f8de5-2d5f-4d9a-9b33-9a1f62d9f4b2
-   NEXT_PUBLIC_API_KEY=dev-api-key
+   NEXT_PUBLIC_API_KEY=your-api-key
    ```
 
-4. **Optionally generate API types from Swagger:**
+4. **Start development server:**
    ```bash
-   pnpm openapi:gen
+   npm run dev
    ```
 
-## Development
+   Visit [http://localhost:3000](http://localhost:3000)
 
-Start the development server:
+### Available Scripts
 
-```bash
-pnpm dev
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production  
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run test suite
+- `npm run test:watch` - Run tests in watch mode
+- `npm run format` - Format code with Prettier
 
-Visit [http://localhost:3000](http://localhost:3000) to view the application.
-
-## Available Scripts
-
-- `pnpm dev` - Start development server
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
-- `pnpm test` - Run tests
-- `pnpm openapi:gen` - Generate API types from Swagger
-
-## Features
-
-### 🔍 **Onboarding Form**
-- Clean, accessible form with validation
-- Fields: Entity Name, Region, Category, Tags (comma-separated)
-- Real-time validation with Zod schemas
-- Loading states and error handling
-- Mobile-first responsive design
-
-### 📊 **Score Display**
-- Prominent score card showing 0-100 score
-- Detailed explanation of scoring factors
-- Updates automatically after form submission
-- Visual feedback for score ranges
-
-### 📈 **Recent Sessions**
-- Last 10 onboarding sessions for the user
-- Shows session ID, creation date, and score
-- Auto-refreshes on window focus
-- Responsive grid layout
-
-### 🎨 **UI/UX Features**
-- **Accessibility:** ARIA labels, keyboard navigation, focus management
-- **Responsive:** Mobile-first design with desktop enhancements
-- **Performance:** React Query caching and optimistic updates
-- **Error Handling:** Toast notifications and inline error messages
-- **Loading States:** Skeletons and spinners throughout
-
-## API Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_API_BASE_URL` | Backend API base URL | `http://localhost:3000` |
-| `NEXT_PUBLIC_HARDCODED_USER_ID` | User ID for API calls | Required (UUID) |
-| `NEXT_PUBLIC_API_KEY` | API authentication key | Optional |
-
-### API Endpoints Used
-
-- `POST /v1/onboarding` - Submit onboarding data
-- `GET /v1/onboarding/recent/:user_id` - Fetch recent sessions
-
-## Usage
-
-1. **Fill out the onboarding form:**
-   - Entity Name (minimum 2 characters)
-   - Region (required)
-   - Category (required)
-   - Tags (comma-separated, optional)
-
-2. **Submit and view score:**
-   - Score appears in the score card (0-100)
-   - Explanation shows scoring factors
-   - Recent sessions list updates automatically
-
-3. **View session history:**
-   - Recent sessions show automatically
-   - Click refresh to manually update
-   - Each session shows ID, date, and score
-
-## Type Generation
-
-This project supports automatic API type generation from your backend's Swagger/OpenAPI documentation:
-
-```bash
-# Generate types from backend Swagger JSON
-pnpm openapi:gen
-```
-
-This fetches the OpenAPI spec from `${API_BASE_URL}/docs-json` and generates TypeScript types. If generation fails, the app falls back to handwritten types in `src/lib/types.ts`.
-
-## Testing
-
-Run the test suite:
-
-```bash
-pnpm test
-```
-
-The test suite includes:
-- Smoke tests for component rendering
-- Form validation testing
-- API integration mocking
-- Accessibility testing
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 onboarding-ui-score-viewer/
-├── public/
-│   └── favicon.ico
+├── public/                    # Static assets
 ├── src/
-│   ├── app/
-│   │   ├── layout.tsx          # Root layout with providers
-│   │   ├── page.tsx            # Main dashboard page
-│   │   └── globals.css         # Global styles
-│   ├── components/
-│   │   ├── OnboardingForm.tsx  # Main form component
-│   │   ├── ScoreCard.tsx       # Score display component
-│   │   ├── RecentSessions.tsx  # Sessions list component
-│   │   └── UI/                 # Reusable UI components
-│   │       ├── Button.tsx
-│   │       ├── Input.tsx
-│   │       ├── Card.tsx
-│   │       └── ...
-│   ├── lib/
-│   │   ├── axios.ts            # Axios configuration
-│   │   ├── queryClient.ts      # React Query setup
-│   │   ├── zodSchemas.ts       # Form validation schemas
-│   │   ├── types.ts            # TypeScript type definitions
-│   │   └── openapi/            # Generated API types
-│   ├── hooks/
-│   │   ├── usePostOnboarding.ts  # Form submission hook
-│   │   └── useRecentSessions.ts  # Data fetching hook
-│   └── tests/
-│       ├── smoke.test.tsx
-│       └── setupTests.ts
+│   ├── app/                   # Next.js App Router pages
+│   │   ├── layout.tsx         # Root layout with providers
+│   │   ├── page.tsx           # Homepage
+│   │   ├── onboarding/        # Onboarding page
+│   │   └── globals.css        # Global styles
+│   ├── components/            # React components
+│   │   ├── onboarding/        # Onboarding flow components
+│   │   │   ├── onboarding-form.tsx
+│   │   │   ├── step-indicator.tsx
+│   │   │   └── steps/         # Individual form steps
+│   │   │       ├── basic-info-step.tsx
+│   │   │       ├── preferences-step.tsx
+│   │   │       └── review-step.tsx
+│   │   ├── score/             # Score display components
+│   │   │   ├── score-display.tsx
+│   │   │   ├── score-breakdown.tsx
+│   │   │   ├── recommendations.tsx
+│   │   │   ├── score-history.tsx
+│   │   │   └── circular-progress.tsx
+│   │   ├── ui/                # Reusable UI components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   └── ...
+│   │   └── providers/         # React context providers
+│   │       └── providers.tsx
+│   ├── lib/                   # Utilities and configurations
+│   │   ├── api/               # API layer
+│   │   │   ├── client.ts      # Axios configuration
+│   │   │   └── endpoints.ts   # API endpoints
+│   │   ├── hooks/             # Custom React hooks
+│   │   │   └── api.ts         # API hooks using React Query
+│   │   ├── types/             # TypeScript type definitions
+│   │   │   └── api.ts         # API response types
+│   │   ├── validations/       # Zod validation schemas
+│   │   │   └── onboarding.ts  # Form validation
+│   │   └── utils.ts           # Utility functions
+│   └── test/                  # Test files
+│       └── setup.ts           # Test configuration
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
-├── next.config.mjs
+├── next.config.js
+├── vitest.config.ts
 └── ...
 ```
 
-## Troubleshooting
+## 🔧 API Integration
 
-### Common Issues
+### API Endpoints
 
-**CORS Errors**
-- Ensure your backend API has CORS enabled for `http://localhost:3000`
-- Check the backend's CORS configuration
+**Onboarding Submission**
+```typescript
+POST /v1/onboarding
+{
+  userId: string,
+  rawInput: {
+    personalInfo: {
+      age: number,
+      income: number,
+      employment: string,
+      education: string
+    },
+    preferences: {
+      riskTolerance: string,
+      investmentGoals: string[],
+      timeHorizon: string
+    },
+    flags: string[]
+  }
+}
+```
 
-**Authentication Errors (401/403)**
-- Verify `NEXT_PUBLIC_API_KEY` is set correctly in `.env.local`
-- Ensure the API key matches your backend configuration
+**Session History**
+```typescript
+GET /v1/onboarding/recent/:userId
+Response: {
+  id: string,
+  createdAt: string,
+  score: number,
+  scoreExplanation: string
+}[]
+```
 
-**API Connection Issues**
-- Confirm `NEXT_PUBLIC_API_BASE_URL` points to your running backend
-- Verify the backend is running on the specified port
+### Data Models
 
-**Type Generation Issues**
-- Ensure backend is running with Swagger docs available at `/docs-json`
-- Check network connectivity to the API
-- Falls back to manual types if generation fails
+**OnboardingFormData**
+```typescript
+interface OnboardingFormData {
+  age: number
+  income: number
+  employment: 'full-time' | 'part-time' | 'unemployed' | 'self-employed' | 'retired'
+  education: 'high-school' | 'bachelors' | 'masters' | 'phd' | 'other'
+  riskTolerance: 'low' | 'moderate' | 'high'
+  investmentGoals: string[]
+  timeHorizon: 'short' | 'medium' | 'long'
+  flags: string[]
+  userId?: string
+}
+```
 
-**Build/Runtime Errors**
-- Clear Next.js cache: `rm -rf .next`
-- Reinstall dependencies: `rm -rf node_modules && pnpm install`
-- Check TypeScript compilation: `pnpm build`
+## 🧪 Testing
 
-### Development Tips
+### Test Suite Includes
+- Component rendering tests
+- Form validation testing
+- API integration mocking
+- User interaction testing
+- Accessibility testing
 
-- Use React Developer Tools for component debugging
-- Enable React Query DevTools in development
-- Check browser Network tab for API request/response debugging
-- Use Tailwind CSS IntelliSense extension for better styling experience
+### Running Tests
+```bash
+# Run all tests
+npm run test
 
-## Contributing
+# Watch mode
+npm run test:watch
+
+# UI mode
+npm run test:ui
+```
+
+## 📱 Mobile Responsiveness
+
+The application is built with a mobile-first approach:
+
+- **Breakpoints:** Tailwind CSS responsive classes (sm, md, lg, xl)
+- **Touch-friendly:** Larger tap targets and spacing on mobile
+- **Adaptive Layout:** Step indicators and forms adjust to screen size
+- **Performance:** Optimized for mobile devices
+
+## 🔒 Data Privacy & Storage
+
+**Client-Side Storage**
+- Form data temporarily stored in localStorage
+- Data cleared after successful submission
+- No sensitive data persisted long-term
+
+**Security Considerations**
+- Form validation on both client and server
+- API key authentication
+- HTTPS in production
+- Input sanitization
+
+## 🚀 Deployment
+
+### Build Process
+```bash
+npm run build
+npm run start
+```
+
+### Environment Variables (Production)
+```env
+NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.com
+NEXT_PUBLIC_API_KEY=production-api-key
+```
+
+### Deployment Platforms
+- **Vercel:** Optimized for Next.js applications
+- **Netlify:** Static site hosting with serverless functions
+- **Docker:** Containerized deployment
+- **Traditional hosting:** Build static files
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Add tests if applicable
-5. Ensure code passes linting (`pnpm lint`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+4. Add tests for new functionality
+5. Ensure all tests pass (`npm run test`)
+6. Run linting (`npm run lint`)
+7. Commit your changes (`git commit -m 'Add amazing feature'`)
+8. Push to the branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
 
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Related Projects
+## 🔗 Related Projects
 
-- [Modular Onboarding + Scoring API](https://github.com/example/modular-onboarding-scoring) - Backend API and scoring service
+- [Investment Scoring API](https://github.com/mengeshaster/onboarding-ui-score-viewer.git) - Backend API and scoring engine
+- [Score Analytics Dashboard](https://github.com/mengeshaster/modular-onboarding-scoring.git) - Admin dashboard for score analysis

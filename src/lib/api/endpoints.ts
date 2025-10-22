@@ -18,15 +18,5 @@ export const onboardingApi = {
   // Get recent onboarding sessions for a user (for history)
   getRecentSessions: async (userId: string): Promise<OnboardingSession[]> => {
     return apiClient.get<OnboardingSession[]>(`/onboarding/recent/${userId}`)
-  },
-
-  // Get all onboarding sessions (admin endpoint)
-  getAllSessions: async (): Promise<OnboardingSession[]> => {
-    return apiClient.get<OnboardingSession[]>('/onboarding')
-  },
-
-  // Delete an onboarding session
-  deleteSession: async (sessionId: string): Promise<void> => {
-    return apiClient.delete<void>(`/onboarding/${sessionId}`)
   }
 }
