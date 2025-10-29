@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BasicInfoStep } from './steps/basic-info-step'
 import { PreferencesStep } from './steps/preferences-step'
+import { QuestionnaireStep } from './steps/questionnaire-step'
 import { ReviewStep } from './steps/review-step'
 import { StepIndicator } from './step-indicator'
 
@@ -21,6 +22,7 @@ interface OnboardingFormProps {
 const STEPS = [
   { id: 'basic-info', title: 'Basic Information', description: 'Tell us about yourself' },
   { id: 'preferences', title: 'Preferences', description: 'Set your preferences' },
+  { id: 'questionnaire', title: 'Risk Assessment', description: 'Complete risk questionnaire' },
   { id: 'review', title: 'Review & Submit', description: 'Review your information and submit' },
 ]
 
@@ -186,6 +188,8 @@ export function OnboardingForm({ onComplete, onReset }: OnboardingFormProps) {
       case 1:
         return ["riskTolerance", "investmentGoals", "timeHorizon"]
       case 2:
+        return ["flags"]
+      case 3:
         return []
       default:
         return []
@@ -199,6 +203,8 @@ export function OnboardingForm({ onComplete, onReset }: OnboardingFormProps) {
       case 1:
         return <PreferencesStep form={form} />
       case 2:
+        return <QuestionnaireStep form={form} />
+      case 3:
         return <ReviewStep form={form} />
       default:
         return null

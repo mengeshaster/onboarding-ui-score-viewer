@@ -35,6 +35,29 @@ export interface RecentSessionSummary {
   score: number | null // 0-100
 }
 
+export interface SessionSummary {
+  id: string // UUID
+  createdAt: string // ISO date-time
+  score: number // 0-100
+}
+
+export interface PaginatedSessionsResponse {
+  data: SessionSummary[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
+  meta: {
+    datetime: string
+    order: string
+    source: string
+  }
+}
+
 export interface ApiError {
   error: {
     code: string

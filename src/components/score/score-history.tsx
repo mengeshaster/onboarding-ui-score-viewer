@@ -1,9 +1,11 @@
 'use client'
 
-import { useRecentOnboardingSessions } from '@/lib/hooks/api'
+import { useState } from 'react'
+import { useSessionsHistory } from '@/lib/hooks/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDateTime, getScoreBadgeColor } from '@/lib/utils'
+import { SessionSummary } from '@/lib/types/api'
 
 interface ScoreHistoryProps {
   userId: string | null
@@ -12,7 +14,13 @@ interface ScoreHistoryProps {
 }
 
 export function ScoreHistory({ userId, onBackToScore, onStartOver }: ScoreHistoryProps) {
-  const { data: sessions, isLoading, error } = useRecentOnboardingSessions(userId)
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
+  
+  const { data: response, isLoading, error } = useSessionsHistory(undefined, currentPage, pageSize)
+  
+  const sessions = response?.data || []
+  const pagination = response?.pagination
 
   if (isLoading) {
     return (
@@ -71,12 +79,28 @@ export function ScoreHistory({ userId, onBackToScore, onStartOver }: ScoreHistor
           <CardTitle>Assessment History</CardTitle>
           <CardDescription>
             Your previous investment readiness assessments
+            {pagination && (
+              <span className="block mt-1 text-xs">
+                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, pagination.total)} of {pagination.total} assessments
+              </span>
+            )}
           </CardDescription>
+          {/* Action buttons under the card description */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <Button variant="outline" onClick={onBackToScore}>
+              Back to Current Score
+            </Button>
+            <Button onClick={onStartOver}>
+              Take New Assessment
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {sessions.map((session, index) => {
-              const badgeColor = getScoreBadgeColor(session.score || 0)
+            {sessions.map((session: SessionSummary, index: number) => {
+              const badgeColor = getScoreBadgeColor(session.score)
+              // Calculate the assessment number based on total count and current page
+              const assessmentNumber = pagination ? (pagination.total - ((currentPage - 1) * pageSize) - index) : (sessions.length - index)
               
               return (
                 <div
@@ -86,10 +110,10 @@ export function ScoreHistory({ userId, onBackToScore, onStartOver }: ScoreHistor
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <h3 className="font-semibold">
-                        Assessment #{sessions.length - index}
+                        Assessment #{assessmentNumber}
                       </h3>
                       <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
-                        Score: {session.score || 0}
+                        Score: {session.score}
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -101,7 +125,7 @@ export function ScoreHistory({ userId, onBackToScore, onStartOver }: ScoreHistor
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                      {session.score || 0}
+                      {session.score}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       out of 100
@@ -114,14 +138,56 @@ export function ScoreHistory({ userId, onBackToScore, onStartOver }: ScoreHistor
         </CardContent>
       </Card>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button variant="outline" onClick={onBackToScore}>
-          Back to Current Score
-        </Button>
-        <Button onClick={onStartOver}>
-          Take New Assessment
-        </Button>
-      </div>
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <Card>
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                disabled={!pagination.hasPrevPage}
+              >
+                First
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={!pagination.hasPrevPage}
+              >
+                Previous
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {pagination.totalPages}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={!pagination.hasNextPage}
+              >
+                Next
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(pagination.totalPages)}
+                disabled={!pagination.hasNextPage}
+              >
+                Last
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
